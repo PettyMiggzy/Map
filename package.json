@@ -1,0 +1,14 @@
+{
+  "name": "rh-bubblemaps",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Bubble maps for Robinhood Chain — free-RPC-first wallet graph indexer + viz",
+  "scripts": {
+    "index": "node scripts/index-token.mjs",
+    "index:stag": "node scripts/index-token.mjs 0xCDdB2d9838b7eDab2F04aF4943a6EFE42C2f9F49"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4"
+  }
+}

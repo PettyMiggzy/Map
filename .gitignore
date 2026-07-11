@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.*
+!.env.example
+.vercel
+data/*.json
+!data/stag-graph.json
+*.log
+.DS_Store
