@@ -26,11 +26,24 @@ node scripts/index-token.mjs 0xCDdB2d9838b7eDab2F04aF4943a6EFE42C2f9F49   # $STA
    node scripts/index-token.mjs 0xCDdB2d9838b7eDab2F04aF4943a6EFE42C2f9F49
    ```
 
+## Whole-chain mode
+This is a map of the **entire Robinhood Chain**, not one token. Discovery registers every
+ERC-20 into `bm_tokens`; the indexer cron then backfills + refreshes each one.
+```bash
+node scripts/enumerate-tokens.mjs                 # register all ERC-20s (skips <2-holder dust)
+node scripts/enumerate-tokens.mjs --min-holders 0 # literally every token
+```
+`/api/enumerate` does the same on an hourly cron to catch new launches. The indexer cron
+backfills **never-indexed tokens first** (ordered by `bm_cursor` recency, nulls first), then
+round-robins to keep everything fresh — so a fresh chain drains fairly without starving new tokens.
+
 ## API
 - `GET /api/bubblemap?token=0x…` — graph JSON rebuilt from the DB (cached at the edge).
 - `GET /api/bubblemap?token=0x…&live=1` — recompute straight off the free RPC (bypasses DB).
-- `GET /api/index-cron` — incremental indexer; advances every `active` token in `bm_tokens`
-  from its cursor. Scheduled in `vercel.json` (every 2 min). Guard with `CRON_SECRET` in prod.
+- `GET /api/tokens?q=&limit=&offset=` — registry list / search for the frontend token picker.
+- `GET /api/index-cron` — incremental indexer; advances `active` tokens from their cursor
+  (`CRON_MAX_TOKENS` per tick). Scheduled every 2 min. Guard with `CRON_SECRET` in prod.
+- `GET /api/enumerate` — whole-chain discovery; registers ERC-20s into `bm_tokens`. Hourly cron.
 
 ## Env
 | var | role |
@@ -38,8 +51,10 @@ node scripts/index-token.mjs 0xCDdB2d9838b7eDab2F04aF4943a6EFE42C2f9F49   # $STA
 | `RH_RPC_URL` | free public RPC (default set) — **primary** |
 | `BUBBLE_DATABASE_URL` | **separate** Neon Postgres — serve + index target |
 | `ALCHEMY_RPC_URL` | fallback only (rate-limit relief, phase-2 native funding) |
-| `CRON_SECRET` | optional bearer token to protect `/api/index-cron` |
-| `CRON_MAX_TOKENS` | tokens advanced per cron tick (default 8) |
+| `CRON_SECRET` | optional bearer token to protect `/api/index-cron` + `/api/enumerate` |
+| `CRON_MAX_TOKENS` | tokens advanced per indexer tick (default 8) |
+| `ENUM_MIN_HOLDERS` | skip dust below N holders during discovery (default 2) |
+| `ENUM_MAX_PAGES` | Blockscout pages per `/api/enumerate` invocation (default 40) |
 
 ## Deploy
 Standalone Vercel project (Node functions in `api/`, static `public/`). Set a **separate**
