@@ -81,6 +81,7 @@
 
     .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:2rem;text-align:center;
       background:rgba(5,13,8,.55);backdrop-filter:blur(2px)}
+    .overlay[hidden],.legend[hidden],.stats[hidden]{display:none}
     .overlay .msg{max-width:46ch;color:var(--muted);font-size:.98rem;line-height:1.55}
     .overlay .msg b{color:var(--gold-lite)}
     .overlay .msg.err b,.overlay .msg.err strong{color:#f3b98f}
