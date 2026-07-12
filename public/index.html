@@ -373,7 +373,7 @@
     function buildClusters(nodes) {
       const groups = new Map();
       for (const n of nodes) {
-        if (n.isPool || n.isBurn) continue;
+        if (n.isPool || n.isContract || n.isBurn) continue;
         let key = null, kind = null;
         if (n.fundCluster > 0) { key = 'f' + n.fundCluster; kind = 'fund'; }
         else if (n.cluster > 0) { key = 'c' + n.cluster; kind = 'block'; }
@@ -405,14 +405,14 @@
         const dec = Number(g.token && g.token.decimals != null ? g.token.decimals : 18);
 
         const nodes = (g.nodes || []).map((n) => {
-          const isPool = n.tag === 'LP Pool', isBurn = n.tag === 'burn';
+          const isPool = n.tag === 'LP Pool', isContract = n.tag === 'Contract', isBurn = n.tag === 'burn';
           return {
             id: n.id, short: short(n.id), pct: +n.pct || 0,
             balDisp: fmtBal(n.bal, dec),
             cluster: n.cluster || 0, fundCluster: n.fundCluster || 0, funder: n.funder || null,
-            firstBlock: n.firstBlock, isPool, isBurn,
+            firstBlock: n.firstBlock, isPool, isContract, isBurn,
             val: Math.max(0.06, +n.pct || 0),
-            color: isPool ? CONTRACT : isBurn ? DEAD : SOLO,
+            color: (isPool || isContract) ? CONTRACT : isBurn ? DEAD : SOLO,
             clusterIdx: -1, clusterKind: null,
           };
         });
@@ -515,7 +515,7 @@
       let maxVal = 0; nodes.forEach((n) => { if (n.val > maxVal) maxVal = n.val; });
       maxVal = maxVal || 1;
       let whaleId = null, maxPct = -1;
-      nodes.forEach((n) => { if (!n.isPool && !n.isBurn && n.pct > maxPct) { maxPct = n.pct; whaleId = n.id; } });
+      nodes.forEach((n) => { if (!n.isPool && !n.isContract && !n.isBurn && n.pct > maxPct) { maxPct = n.pct; whaleId = n.id; } });
       nodes.forEach((n) => {
         n.whale = (n.id === whaleId);
         n.r = MIN_R + (MAX_R - MIN_R) * Math.sqrt(n.val / maxVal);
@@ -526,7 +526,7 @@
           .backgroundColor('rgba(6,16,9,0)')
           .nodeRelSize(1)
           .cooldownTime(4000)  // stop the sim after 4s instead of the 15s default (safe, no pre-run)
-          .nodeLabel((n) => `<div style="font-family:Inter,sans-serif;font-size:12px;padding:2px"><b>${esc(n.short)}</b>${n.isPool?' · LP Pool':n.isBurn?' · burn':n.whale?' · 🐋 whale':n.fundCluster?' · funded cluster':n.cluster?' · same-block':''}<br><span style="color:#e6b83f">${n.pct.toFixed(2)}%</span> · ${esc(n.balDisp)}</div>`)
+          .nodeLabel((n) => `<div style="font-family:Inter,sans-serif;font-size:12px;padding:2px"><b>${esc(n.short)}</b>${n.isPool?' · LP Pool':n.isContract?' · Contract':n.isBurn?' · burn':n.whale?' · 🐋 whale':n.fundCluster?' · funded cluster':n.cluster?' · same-block':''}<br><span style="color:#e6b83f">${n.pct.toFixed(2)}%</span> · ${esc(n.balDisp)}</div>`)
           .linkColor((l) => l.color || 'rgba(160,200,160,.3)')
           .linkWidth((l) => l.width || 1)
           .linkDirectionalParticles((l) => l.kind === 'funding' ? 2 : 0)
@@ -581,11 +581,11 @@
     const EYE = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg>';
     const EYE_OFF = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20C5 20 1 12 1 12a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22"/></svg>';
     const eyeBtn = (attr, off) => `<button class="eye${off?' off':''}" ${attr} type="button" title="Toggle on map" aria-label="Toggle visibility">${off?EYE_OFF:EYE}</button>`;
-    const tagOf = (n) => n.isPool ? '<span class="atag">LP Pool</span>' : n.isBurn ? '<span class="atag dead">Burn</span>' : '';
+    const tagOf = (n) => n.isPool ? '<span class="atag">LP Pool</span>' : n.isContract ? '<span class="atag">Contract</span>' : n.isBurn ? '<span class="atag dead">Burn</span>' : '';
 
     function holderRow(n, showDot) {
       const sel = n.id === selectedId ? ' sel' : '';
-      const dim = (n.isPool || n.isBurn) ? ' dim' : '';
+      const dim = (n.isPool || n.isContract || n.isBurn) ? ' dim' : '';
       return `<div class="arow${sel}${dim}" data-id="${esc(n.id)}">`
         + `<span class="rank">${n.rank}</span>`
         + (showDot ? `<span class="dot" style="background:${esc(n.color)};color:${esc(n.color)}"></span>` : '')
@@ -682,6 +682,7 @@
     function showInfo(n) {
       const box = $('info');
       const tags = n.isPool ? '<span class="tag ct">LP Pool</span>'
+        : n.isContract ? '<span class="tag ct">Contract</span>'
         : n.isBurn ? '<span class="tag dead">Burn address</span>'
         : n.whale ? '<span class="tag whale">🐋 Whale</span>'
         : n.fundCluster ? '<span class="tag fund">Funded cluster</span>'

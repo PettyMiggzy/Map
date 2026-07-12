@@ -43,3 +43,13 @@ CREATE TABLE IF NOT EXISTS bm_funding (
   PRIMARY KEY (wallet, funder, block)
 );
 CREATE INDEX IF NOT EXISTS bm_funding_funder ON bm_funding (funder);
+
+-- Address labels (global — an address is a contract regardless of token). Populated store-once
+-- from eth_getCode on the FREE RPC ($0 CU): 'LP Pool' (bidirectional pool contract),
+-- 'Contract' (other code), 'EOA' (no code — cached so we never re-probe). Keeps liquidity
+-- pools / routers / staking contracts from being mislabeled as whale holders.
+CREATE TABLE IF NOT EXISTS bm_labels (
+  address    text PRIMARY KEY,
+  label      text NOT NULL,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
