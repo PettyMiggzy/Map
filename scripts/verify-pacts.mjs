@@ -33,7 +33,7 @@ export async function runVerifier(opts = {}) {
   const STAG = opts.stag || process.env.STAG_ADDRESS || STAG_DEFAULT;
   const KEY = opts.key || process.env.ORACLE_KEY;
   const REWARD = ethers.parseEther(String(opts.rewardEth ?? process.env.REWARD_ETH ?? "0"));
-  const MAX = parseInt(opts.maxScan || process.env.PACT_MAX_SCAN || "200", 10);
+  const MAX = parseInt(opts.maxScan || process.env.PACT_MAX_SCAN || "500", 10);
   const DRY = opts.dryRun ?? (process.env.DRY_RUN === "1");
   if (!PACT) throw new Error("PACT_ADDRESS not set");
   if (!DRY && !KEY) throw new Error("ORACLE_KEY not set (or run DRY_RUN=1)");
@@ -48,8 +48,14 @@ export async function runVerifier(opts = {}) {
     if (oracle.toLowerCase() !== (await signer.getAddress()).toLowerCase())
       throw new Error(`ORACLE_KEY (${await signer.getAddress()}) is not the pact oracle (${oracle})`);
   }
-  // $STAG must be 18 decimals for minHold (1e18-scaled) to match raw transfer values.
-  try { const d = Number(await new ethers.Contract(STAG, ERC20_ABI, provider).decimals()); if (d !== 18) throw new Error(`token decimals ${d} != 18 — holding math assumes 18`); } catch (e) { if (/!= 18/.test(e.message)) throw e; }
+  // $STAG must be positively confirmed as 18 decimals (minHold is 1e18-scaled). Fail CLOSED:
+  // if the call errors we abort the run rather than proceed on an assumption.
+  {
+    let d;
+    try { d = Number(await new ethers.Contract(STAG, ERC20_ABI, provider).decimals()); }
+    catch (e) { throw new Error(`could not read ${STAG} decimals to confirm 18: ${e.shortMessage || e.message}`); }
+    if (d !== 18) throw new Error(`token decimals ${d} != 18 — holding math assumes 18`);
+  }
 
   const maxReward = await pact.maxReward();
   const reward = REWARD > maxReward ? maxReward : REWARD;

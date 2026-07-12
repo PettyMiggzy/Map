@@ -5,11 +5,11 @@
 import { runVerifier } from "../scripts/verify-pacts.mjs";
 
 export default async function handler(req, res) {
+  // Fail CLOSED: this endpoint spends the oracle's gas, so it must be authenticated. If no
+  // CRON_SECRET is configured we refuse rather than run open to the public.
   const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const auth = req.headers.authorization || "";
-    if (auth !== `Bearer ${secret}`) return res.status(401).json({ error: "unauthorized" });
-  }
+  if (!secret) return res.status(500).json({ error: "CRON_SECRET not set — refusing to run an unauthenticated oracle" });
+  if ((req.headers.authorization || "") !== `Bearer ${secret}`) return res.status(401).json({ error: "unauthorized" });
   if (!process.env.PACT_ADDRESS) return res.status(500).json({ error: "PACT_ADDRESS not set" });
   if (!process.env.ORACLE_KEY) return res.status(500).json({ error: "ORACLE_KEY not set" });
   try {

@@ -30,7 +30,13 @@ reach back before a pact's start, that pact is **skipped**, never wrongly forfei
 | `STAG_ADDRESS` | pledged token (default $STAG) |
 | `ORACLE_KEY` | private key of the oracle wallet |
 | `REWARD_ETH` | reward paid on held=true (default `0` → just the refund) |
-| `CRON_SECRET` | optional bearer guard for the cron endpoint |
+| `CRON_SECRET` | **required** — bearer guard; the cron refuses to run without it (it spends oracle gas) |
+
+## Fail-safe guards (from the oracle audit)
+- Addresses are lowercased on index (write) and the read is case-insensitive — a casing mismatch can't hide a dip or drop a holder.
+- A decision is only made when the index **captured genesis** (earliest row is a mint or predates the pact) **and** the **cursor has advanced past the window end**; otherwise the pact is skipped, never guessed.
+- Any unresolved block timestamp → skip (retry next run), never fed into the balance math.
+- Decimals must be positively confirmed as 18 or the run aborts; the cron fails closed without `CRON_SECRET`.
 
 ## Running
 - **Automatic:** `/api/verify-pacts-cron` runs every 10 min (see `vercel.json`).
