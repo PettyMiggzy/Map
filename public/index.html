@@ -8,10 +8,12 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <style>
     :root{
-      --bg:#06120a; --bg-2:#0a1c10; --panel:rgba(14,36,21,.82); --panel-2:rgba(8,22,13,.9);
+      /* Robinhood brand: signature neon green on near-black, $STAG gold as the accent */
+      --bg:#05080a; --bg-2:#0a140f; --panel:rgba(10,22,15,.82); --panel-2:rgba(6,13,9,.9);
+      --rh:#00c805; --rh-lite:#3dff67;
       --gold:#e6b83f; --gold-lite:#f8e6a0; --gold-deep:#a9791f;
-      --ink:#e9f2e4; --muted:#a9c1a5; --line:rgba(230,184,63,.18); --radius:18px;
-      --contract:#6fa8ff; --dead:#7c8a7c; --solo:rgba(150,190,150,.55);
+      --ink:#eafff0; --muted:#8fb89a; --line:rgba(0,200,5,.18); --radius:18px;
+      --contract:#6fa8ff; --dead:#7c8a7c; --solo:#00c805;
     }
     *{box-sizing:border-box}
     html,body{margin:0;padding:0}
@@ -21,10 +23,10 @@
       -webkit-font-smoothing:antialiased;
     }
     .bg-layer{position:fixed;inset:0;z-index:-2;pointer-events:none}
-    .bg-forest{background:radial-gradient(120% 90% at 50% -10%, #0c2414 0%, #06120a 55%, #04100a 100%)}
+    .bg-forest{background:radial-gradient(120% 90% at 50% -10%, #0a1a10 0%, #05080a 55%, #03060a 100%)}
     .bg-glow{z-index:-1;background:
-      radial-gradient(40% 40% at 78% 18%, rgba(230,184,63,.10), transparent 70%),
-      radial-gradient(45% 45% at 12% 82%, rgba(74,150,90,.10), transparent 70%)}
+      radial-gradient(45% 45% at 20% 16%, rgba(0,200,5,.13), transparent 70%),
+      radial-gradient(40% 40% at 82% 84%, rgba(230,184,63,.08), transparent 70%)}
     a{color:inherit;text-decoration:none}
     .gold{color:var(--gold)}
     em{color:var(--gold-lite);font-style:normal}
@@ -94,7 +96,7 @@
       font-size:.72rem;color:var(--muted);max-width:calc(100% - 1.6rem);backdrop-filter:blur(6px)}
     .legend span{display:inline-flex;align-items:center;gap:.4rem}
     .legend i{width:10px;height:10px;border-radius:50%;flex:none;box-shadow:0 0 7px currentColor}
-    .legend .lc{color:#8ce65a}.legend .ls{color:#a9c1a5}.legend .lp{color:var(--contract)}
+    .legend .lc{color:#8ce65a}.legend .ls{color:#00c805}.legend .lp{color:var(--contract)}
     .legend .lb{color:var(--dead)}.legend .lf{color:var(--gold)}
     .legend .swatch{width:16px;height:0;border-top:2px solid currentColor;box-shadow:none;border-radius:0}
     .legend .hint{color:var(--gold-deep);font-style:italic}
