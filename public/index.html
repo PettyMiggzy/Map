@@ -328,6 +328,11 @@
       const n = parseInt(m, 16);
       return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;
     }
+    // [r,g,b] from a #hex or rgb()/rgba() string — used for the glossy orb shading
+    function rgbOf(c) {
+      if (c && c[0] === '#') { let m = c.slice(1); if (m.length === 3) m = m.split('').map((x)=>x+x).join(''); const n = parseInt(m,16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+      const m = /(\d+),\s*(\d+),\s*(\d+)/.exec(c||''); return m ? [+m[1],+m[2],+m[3]] : [150,190,150];
+    }
     function lighten(c) {
       if (c[0] === '#') {
         let m = c.slice(1); if (m.length === 3) m = m.split('').map((x)=>x+x).join('');
@@ -542,21 +547,38 @@
           .nodeCanvasObject((n, ctx, scale) => {
             if (!isFinite(n.x) || !isFinite(n.y)) return;
             const r = radius(n);
-            ctx.save();
-            ctx.shadowColor = n.color; ctx.shadowBlur = Math.min(24, r * 1.4);
-            const grad = ctx.createRadialGradient(n.x - r*0.35, n.y - r*0.35, r*0.12, n.x, n.y, r);
-            grad.addColorStop(0, 'rgba(255,255,255,.95)');
-            grad.addColorStop(0.28, lighten(n.color));
-            grad.addColorStop(1, n.color);
-            ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, 2*Math.PI); ctx.fillStyle = grad; ctx.fill();
-            ctx.restore();
+            const [cr, cg, cb] = rgbOf(n.color);
+            // 1) soft outer bloom — replaces per-node shadowBlur (cheaper, richer)
+            const glow = ctx.createRadialGradient(n.x, n.y, r * 0.55, n.x, n.y, r * 1.95);
+            glow.addColorStop(0, `rgba(${cr},${cg},${cb},.30)`);
+            glow.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+            ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(n.x, n.y, r * 1.95, 0, 2 * Math.PI); ctx.fill();
+            // 2) glossy sphere body — offset radial gives 3D depth (top-left lit, bottom-right dark)
+            const g = ctx.createRadialGradient(n.x - r * 0.4, n.y - r * 0.44, r * 0.04, n.x, n.y, r * 1.06);
+            g.addColorStop(0, 'rgba(255,255,255,.98)');
+            g.addColorStop(0.18, `rgb(${Math.min(255, cr + 72)},${Math.min(255, cg + 72)},${Math.min(255, cb + 72)})`);
+            g.addColorStop(0.55, `rgb(${cr},${cg},${cb})`);
+            g.addColorStop(1, `rgb(${(cr * 0.5) | 0},${(cg * 0.5) | 0},${(cb * 0.5) | 0})`);
+            ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, 2 * Math.PI); ctx.fillStyle = g; ctx.fill();
+            // 3) thin bright rim for a polished-glass edge
+            ctx.beginPath(); ctx.arc(n.x, n.y, r * 0.985, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = Math.max(0.5, r * 0.05); ctx.stroke();
+            // 4) specular highlight — the glossy catch-light, top-left
+            const hx = n.x - r * 0.33, hy = n.y - r * 0.4, hr = r * 0.46;
+            const sp = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr);
+            sp.addColorStop(0, 'rgba(255,255,255,.85)'); sp.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = sp; ctx.save(); ctx.translate(hx, hy); ctx.rotate(-0.5);
+            ctx.beginPath(); ctx.ellipse(0, 0, hr * 0.95, hr * 0.6, 0, 0, 2 * Math.PI); ctx.fill(); ctx.restore();
             if (n.id === selectedId) {
-              ctx.beginPath(); ctx.arc(n.x, n.y, r + 3.5/scale, 0, 2*Math.PI);
+              ctx.beginPath(); ctx.arc(n.x, n.y, r + 4/scale, 0, 2*Math.PI);
               ctx.strokeStyle = 'rgba(248,230,160,.98)'; ctx.lineWidth = 2.4/scale; ctx.stroke();
             }
             if (n.whale) {
-              ctx.beginPath(); ctx.arc(n.x, n.y, r + 1.8/scale, 0, 2*Math.PI);
+              // premium golden double-ring for the top wallet
+              ctx.beginPath(); ctx.arc(n.x, n.y, r + 2.4/scale, 0, 2*Math.PI);
               ctx.strokeStyle = 'rgba(248,230,160,.95)'; ctx.lineWidth = 2/scale; ctx.stroke();
+              ctx.beginPath(); ctx.arc(n.x, n.y, r + 5.5/scale, 0, 2*Math.PI);
+              ctx.strokeStyle = 'rgba(248,214,110,.35)'; ctx.lineWidth = 1/scale; ctx.stroke();
             }
             // show the % whenever the bubble is big enough ON SCREEN — small ones reveal
             // their label as you zoom in (bubblemaps-style), instead of a fixed cutoff.
