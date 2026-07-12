@@ -430,8 +430,8 @@
           const same = s.clusterIdx >= 0 && s.clusterIdx === t.clusterIdx;
           links.push({
             source: e.from, target: e.to, count: e.count || 1, kind: 'transfer',
-            color: same ? hexToRgba(s.color, 0.5) : 'rgba(150,190,150,.14)',
-            width: Math.min(2.6, 0.7 + (e.count || 1) * 0.35),
+            color: same ? hexToRgba(s.color, 0.62) : 'rgba(160,200,160,.3)',
+            width: Math.min(2.8, 0.9 + (e.count || 1) * 0.35),
           });
         });
         (g.fundingEdges || []).forEach((e) => {
@@ -527,7 +527,7 @@
           .nodeRelSize(1)
           .cooldownTime(4000)  // stop the sim after 4s instead of the 15s default (safe, no pre-run)
           .nodeLabel((n) => `<div style="font-family:Inter,sans-serif;font-size:12px;padding:2px"><b>${esc(n.short)}</b>${n.isPool?' · LP Pool':n.isBurn?' · burn':n.whale?' · 🐋 whale':n.fundCluster?' · funded cluster':n.cluster?' · same-block':''}<br><span style="color:#e6b83f">${n.pct.toFixed(2)}%</span> · ${esc(n.balDisp)}</div>`)
-          .linkColor((l) => l.color || 'rgba(150,190,150,.16)')
+          .linkColor((l) => l.color || 'rgba(160,200,160,.3)')
           .linkWidth((l) => l.width || 1)
           .linkDirectionalParticles((l) => l.kind === 'funding' ? 2 : 0)
           .linkDirectionalParticleWidth(2)
@@ -553,7 +553,9 @@
               ctx.beginPath(); ctx.arc(n.x, n.y, r + 1.8/scale, 0, 2*Math.PI);
               ctx.strokeStyle = 'rgba(248,230,160,.95)'; ctx.lineWidth = 2/scale; ctx.stroke();
             }
-            if (r >= 15) {
+            // show the % whenever the bubble is big enough ON SCREEN — small ones reveal
+            // their label as you zoom in (bubblemaps-style), instead of a fixed cutoff.
+            if (r * scale >= 11) {
               ctx.font = `700 ${(r*0.6).toFixed(1)}px Inter, sans-serif`;
               ctx.fillStyle = 'rgba(6,12,7,.92)'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
               ctx.fillText(n.pct.toFixed(n.pct >= 10 ? 0 : 1) + '%', n.x, n.y);
