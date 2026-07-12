@@ -427,6 +427,10 @@
         (g.edges || []).forEach((e) => {
           const s = idMap[e.from], t = idMap[e.to];
           if (!s || !t || s === t) return;
+          // Drop edges touching the LP pool / contracts / burn: everyone trades against the pool,
+          // so those edges connect it to everything — pure noise that magnetizes the whole graph
+          // into the pool. Wallet-to-wallet transfers are the real signal.
+          if (s.isPool || t.isPool || s.isContract || t.isContract || s.isBurn || t.isBurn) return;
           const same = s.clusterIdx >= 0 && s.clusterIdx === t.clusterIdx;
           links.push({
             source: e.from, target: e.to, count: e.count || 1, kind: 'transfer',
@@ -437,6 +441,7 @@
         (g.fundingEdges || []).forEach((e) => {
           const s = idMap[e.from], t = idMap[e.to];
           if (!s || !t || s === t) return; // funder must be a rendered holder node
+          if (s.isPool || t.isPool || s.isContract || t.isContract) return;
           links.push({ source: e.from, target: e.to, kind: 'funding', color: 'rgba(248,214,110,.72)', width: 2.2 });
         });
 
@@ -568,10 +573,13 @@
       }
       Graph.width(W).height(H);
       pushGraphData();
-      Graph.d3VelocityDecay(0.4);
-      if (Graph.d3Force('charge')) Graph.d3Force('charge').strength((n) => -((n.r || MIN_R) * 1.1 + 6));
-      Graph.d3Force('collide', makeCollide(1.5));
-      if (Graph.d3Force('link')) Graph.d3Force('link').distance((l) => ((l.source.r || MIN_R) + (l.target.r || MIN_R) + 6)).strength((l) => l.kind === 'funding' ? 0.4 : 0.18);
+      Graph.d3VelocityDecay(0.32);
+      // Strong repulsion (scaled by bubble size) so nodes push apart and fill the canvas
+      // instead of collapsing into a blob; a mild radial gravity keeps it centered.
+      if (Graph.d3Force('charge')) Graph.d3Force('charge').strength((n) => -((n.r || MIN_R) * 6 + 90)).distanceMax(1400);
+      Graph.d3Force('collide', makeCollide(1.8));
+      if (Graph.d3Force('link')) Graph.d3Force('link').distance((l) => ((l.source.r || MIN_R) + (l.target.r || MIN_R) + 34)).strength((l) => l.kind === 'funding' ? 0.28 : 0.06);
+      if (Graph.d3Force('center') && Graph.d3Force('center').strength) Graph.d3Force('center').strength(0.04);
       Graph.d3ReheatSimulation && Graph.d3ReheatSimulation();
     }
 
