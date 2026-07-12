@@ -9,6 +9,7 @@
     "index:stag": "node scripts/index-token.mjs 0xCDdB2d9838b7eDab2F04aF4943a6EFE42C2f9F49"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.10.4"
+    "@neondatabase/serverless": "^0.10.4",
+    "ethers": "^6.17.0"
   }
 }
