@@ -6,8 +6,8 @@
 //   ?live=1            -> recompute straight off the FREE RPC (Alchemy only on failure)
 //   (no DB configured) -> serve the committed sample JSON if it matches the seeded token
 import { readFileSync } from "node:fs";
-import { fetchTransfers, buildGraph, buildGraphFromRows } from "../lib/graph.mjs";
-import { hasDb, getTransfers, getTokenMeta } from "../lib/db.mjs";
+import { fetchTransfers, buildGraph, buildGraphFromRows, attachFundingClusters } from "../lib/graph.mjs";
+import { hasDb, getTransfers, getTokenMeta, getFunding } from "../lib/db.mjs";
 
 const STAG = "0xcddb2d9838b7edab2f04af4943a6efe42c2f9f49";
 
@@ -29,6 +29,8 @@ export default async function handler(req, res) {
       }
       const meta = (await getTokenMeta(token)) || {};
       const g = buildGraphFromRows(rows, { token, meta });
+      // overlay "funded by the same wallet" clusters if the funding layer has been indexed
+      try { const funding = await getFunding(g.nodes.map((n) => n.id)); if (funding.length) attachFundingClusters(g, funding); } catch {}
       res.setHeader("cache-control", "s-maxage=300, stale-while-revalidate=600");
       return res.json(g);
     }
