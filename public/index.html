@@ -232,7 +232,7 @@
         <div class="graph-wrap">
           <div id="graph"></div>
           <div class="overlay" id="overlay">
-            <div class="msg" id="overlay-msg">Loading the map…</div>
+            <div class="msg" id="overlay-msg">Loading $STAG Maps…</div>
           </div>
           <div class="legend" id="legend" hidden>
             <span><i class="lf"></i> Funded cluster</span>
@@ -397,7 +397,7 @@
       if (!/^0x[a-f0-9]{40}$/.test(ca)) { setMsg("That doesn't look like a contract (0x + 40 hex).", true); return; }
       const my = ++seq;
       hideInfo(); goBtn.disabled = true; goBtn.textContent = 'Mapping…';
-      setLoading('Loading the map…'); legend.hidden = true; statsEl.hidden = true;
+      setLoading('Loading $STAG Maps…'); legend.hidden = true; statsEl.hidden = true;
       try {
         const g = await fetchJson('/api/bubblemap?token=' + encodeURIComponent(ca));
         if (my !== seq) return;
@@ -524,8 +524,7 @@
         Graph = ForceGraph()(el)
           .backgroundColor('rgba(6,16,9,0)')
           .nodeRelSize(1)
-          .warmupTicks(55)     // pre-lay-out before first paint so it appears settled
-          .cooldownTicks(80)   // stop the sim after ~1.5s instead of the 15s default
+          .cooldownTime(4000)  // stop the sim after 4s instead of the 15s default (safe, no pre-run)
           .nodeLabel((n) => `<div style="font-family:Inter,sans-serif;font-size:12px;padding:2px"><b>${esc(n.short)}</b>${n.isPool?' · LP Pool':n.isBurn?' · burn':n.whale?' · 🐋 whale':n.fundCluster?' · funded cluster':n.cluster?' · same-block':''}<br><span style="color:#e6b83f">${n.pct.toFixed(2)}%</span> · ${esc(n.balDisp)}</div>`)
           .linkColor((l) => l.color || 'rgba(150,190,150,.16)')
           .linkWidth((l) => l.width || 1)
@@ -567,7 +566,6 @@
       Graph.width(W).height(H);
       pushGraphData();
       Graph.d3VelocityDecay(0.4);
-      Graph.d3AlphaDecay(0.055);   // converge ~2.5x faster than the default
       if (Graph.d3Force('charge')) Graph.d3Force('charge').strength((n) => -((n.r || MIN_R) * 1.1 + 6));
       Graph.d3Force('collide', makeCollide(1.5));
       if (Graph.d3Force('link')) Graph.d3Force('link').distance((l) => ((l.source.r || MIN_R) + (l.target.r || MIN_R) + 6)).strength((l) => l.kind === 'funding' ? 0.4 : 0.18);
