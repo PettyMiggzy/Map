@@ -10,7 +10,7 @@ import { fetchTransfers, buildGraph, buildGraphFromRows, attachFundingClusters }
 import { hasDb, getTransfers, getTokenMeta, getFunding, getLabels, upsertLabels } from "../lib/db.mjs";
 import { classifyAddresses } from "../lib/rpc.mjs";
 
-const STAG = "0xcddb2d9838b7edab2f04af4943a6efe42c2f9f49";
+const STAG = "0xcC142366735c882F7885d3c747db99e45E13E453";
 
 // Tag holders that are contracts so liquidity pools / routers / staking contracts aren't shown
 // as whales. Labels are cached store-once in bm_labels; only the top untagged holders are probed

@@ -10,7 +10,7 @@ own Postgres**, never from Alchemy — so viewer traffic costs $0 CU at any scal
 ## Quick start (no database — prototype)
 ```bash
 cp .env.example .env
-node scripts/index-token.mjs 0xCDdB2d9838b7eDab2F04aF4943a6EFE42C2f9F49   # $STAG
+node scripts/index-token.mjs 0xcC142366735c882F7885d3c747db99e45E13E453   # $STAG
 # no BUBBLE_DATABASE_URL set -> writes data/<sym>-graph.json → open public/bubblemap.html
 ```
 
@@ -23,7 +23,7 @@ node scripts/index-token.mjs 0xCDdB2d9838b7eDab2F04aF4943a6EFE42C2f9F49   # $STA
    ```
 3. Backfill a token (upserts `bm_transfers` + `bm_cursor` + `bm_tokens`):
    ```bash
-   node scripts/index-token.mjs 0xCDdB2d9838b7eDab2F04aF4943a6EFE42C2f9F49
+   node scripts/index-token.mjs 0xcC142366735c882F7885d3c747db99e45E13E453
    ```
 
 ## Whole-chain mode

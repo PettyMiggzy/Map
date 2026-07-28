@@ -5,7 +5,7 @@ import { indexFunding } from "../scripts/index-funding.mjs";
 import { usingAlchemy } from "../lib/rpc.mjs";
 import { hasDb, listActiveTokens } from "../lib/db.mjs";
 
-const STAG = "0xcddb2d9838b7edab2f04af4943a6efe42c2f9f49";
+const STAG = "0xcC142366735c882F7885d3c747db99e45E13E453";
 
 // Refresh the funding layer for EVERY indexed Robinhood Chain token (store-once keeps this
 // cheap — each wallet is crawled once, ever). FUND_TOKENS pins a subset; otherwise we pull

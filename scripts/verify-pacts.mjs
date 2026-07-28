@@ -17,7 +17,7 @@
 import { ethers } from "ethers";
 import { heldContinuously } from "../lib/holding.mjs";
 
-const STAG_DEFAULT = "0xCDdB2d9838b7eDab2F04aF4943a6EFE42C2f9F49";
+const STAG_DEFAULT = "0xcC142366735c882F7885d3c747db99e45E13E453";
 const PACT_ABI = [
   "function openPactsPastWindow(uint256,uint256) view returns (uint256[])",
   "function pacts(uint256) view returns (address wallet,uint256 minHold,uint64 start,uint64 duration,uint256 entryPaid,uint256 payout,uint8 status,uint64 reclaimGrace)",

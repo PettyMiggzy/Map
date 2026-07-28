@@ -15,7 +15,7 @@ import { getAssetTransfers, usingAlchemy } from "../lib/rpc.mjs";
 import { getTransfers, getFunding, upsertFunding, hasDb } from "../lib/db.mjs";
 import { buildGraphFromRows } from "../lib/graph.mjs";
 
-const STAG = "0xcddb2d9838b7edab2f04af4943a6efe42c2f9f49";
+const STAG = "0xcC142366735c882F7885d3c747db99e45E13E453";
 const ZERO = "0x0000000000000000000000000000000000000000";
 
 // A wallet's FIRST funder is immutable, so we crawl each wallet exactly once — ever. `budget`
