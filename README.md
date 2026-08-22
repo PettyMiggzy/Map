@@ -1,15 +1,19 @@
-# NOMO // SUBLEVEL DIG
+# NOMO // BURN TO 1
 
-Single-file HTML5 mining game for **NOMO — The 10K Gnome** (Robin Hood Chain).
-Side-view digger: tunnel through dirt and rock, pull $NOMO out of the ground, and
-bank the full **10,000** supply. Buried **red candles** drain your balance; **green
-candles** and **vault gems** pay out. Risk scales with depth across four bands
-(Topsoil → Clay Seam → Deep Vault → The Core), with random market dumps for extra bite.
+Single-file HTML5 arcade game for **NOMO — The 10K Gnome** (Robin Hood Chain).
 
-Controls: **WASD / arrows** to move & dig, **click a tile** to dig toward it, touch
-d-pad on mobile. All audio is synthesised at runtime (Web Audio) — no assets, no
-network requests. Self-contained `index.html`.
+Tap to fly the gnome up the chart and thread the gaps between **red candle** walls.
+Every wall you clear is a buy/sell that **burns supply** — the 10,000 counter ticks
+down and scarcity pumps the price. Grab **green candles** to burn faster and build a
+combo. Torch all 10,000 down to the last one and you win: **you just need 1 $NOMO.**
+Your record is the lowest supply you've ever reached.
 
-_Prototype — tracks an in-game balance only. Real $NOMO payout needs a wallet, a
-disbursing contract, and server-side run validation (sybil resistance) — phase 2._
+Controls: **space / click / tap**. All audio is synthesised at runtime (Web Audio) —
+no assets, no network requests. Self-contained `index.html`.
+
+- `index.html` — **BURN TO 1** (the main game)
+- `dig.html` — SUBLEVEL DIG, the side-view miner prototype
+
+_Prototype — tracks an in-game score only. Real $NOMO payout needs a wallet, a
+disbursing contract, and server-side run validation — phase 2._
 _(The previous project in this repo is preserved in git history.)_
