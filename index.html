@@ -1099,6 +1099,7 @@ function showMenu(){
   state='menu';
   el.ov.classList.remove('hide');
   el.card.innerHTML = `
+    <img id="menuGno" alt="" style="width:104px;height:auto;image-rendering:auto;filter:drop-shadow(0 0 16px rgba(198,255,0,.55));margin:2px auto 8px;display:block">
     <div class="eyebrow">SECURE ACCESS NODE</div>
     <h1>SUBLEVEL DIG</h1>
     <div class="sub">
@@ -1114,6 +1115,7 @@ function showMenu(){
     </div>
     <button id="go">START DIG</button>`;
   document.getElementById('go').onclick = startGame;
+  var _mg=document.getElementById('menuGno'); if(_mg && _NIMG.a.src){ _mg.src=_NIMG.a.src; }
 }
 
 function endGame(win){
